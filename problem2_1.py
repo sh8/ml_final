@@ -15,10 +15,6 @@ A = np.array([[3., 0.5], [0.5, 1.]])
 lr = 1 / np.max(np.linalg.eig(2*A)[0])
 
 
-def fn(weight):
-    return np.dot(np.dot(np.transpose(weight-mu), A), weight-mu)
-
-
 if __name__ == '__main__':
     lines = []
     for k, LAMBDA in enumerate(LAMBDAS):

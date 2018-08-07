@@ -14,7 +14,7 @@ loss_graph = fig.add_subplot(2, 2, 1)
 posi_graph = fig.add_subplot(2, 2, 2)
 loss_posi_graph = fig.add_subplot(2, 2, 4)
 scatter_graph = fig.add_subplot(2, 2, 3)
-RANGE = range(1, 101)
+RANGE = range(1, 51)
 
 
 def gen_dataset():

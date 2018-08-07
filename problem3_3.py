@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 LAMBDA = 2.
-N = 200
+N = 400
 fig = plt.figure(figsize=(20, 16))
 loss_graph = fig.add_subplot(2, 2, 1)
 posi_graph = fig.add_subplot(2, 2, 2)
@@ -59,6 +59,12 @@ def negative_dual(x_train, y_train):
     return w
 
 
+def calc_weight_from_alpha(x, y, alpha):
+    posi_sum = np.sum((alpha * y).reshape([N, -1]) * x, axis=0)
+    w = (1 / (2 * LAMBDA)) * posi_sum
+    return w
+
+
 def eval_positive(alpha, K):
     s = (- 1 / (4 * LAMBDA)) * np.dot(alpha, np.dot(K, alpha))
     s += np.dot(alpha, np.ones(N))
@@ -75,15 +81,21 @@ def positive_dual(x_train, y_train):
                     np.dot(x_train[i], x_train[j])
 
     loss = []
+    posi_loss = []
     for epoch in RANGE:
         lr = 1 / (LAMBDA * (epoch + 1))
         alpha = alpha - lr * (1 / (2 * LAMBDA) * np.dot(K, alpha) - np.ones(N))
         alpha = np.clip(alpha, 0, 1)
 
         eval_loss = eval_positive(alpha, K)
+        w_posi = calc_weight_from_alpha(x_train, y_train, alpha)
+        eval_posi_loss = eval_negative(x_train, y_train, w_posi)
         loss.append(eval_loss)
+        posi_loss.append(eval_posi_loss)
     posi_graph.plot(list(range(1, len(loss) + 1)), loss)
     loss_posi_graph.plot(list(range(1, len(loss) + 1)), loss, label='Score')
+    loss_posi_graph.legend()
+    loss_posi_graph.plot(list(range(1, len(posi_loss) + 1)), posi_loss, label='Loss (Calculated via Dual Problem)')
     loss_posi_graph.legend()
     return alpha
 
@@ -94,24 +106,24 @@ if __name__ == '__main__':
     loss_posi_graph.set_xlabel('Epoch', fontsize=11)
     loss_posi_graph.set_ylabel('Score & Loss', fontsize=11)
 
-    line = - grad * np.arange(-2, 3)
-    scatter_graph.plot(list(range(-2, 3)), line, label='Test line')
+    line = - grad * np.arange(-3, 4)
+    scatter_graph.plot(list(range(-3, 4)), line, label='Ideal Line')
     scatter_graph.legend()
 
     w = negative_dual(x, y)
     loss_graph.set_xlabel('Epoch', fontsize=11)
     loss_graph.set_ylabel('loss', fontsize=11)
-    line = - (w[0] / w[1]) * np.arange(-2, 3)
-    scatter_graph.plot(list(range(-2, 3)), line, label='Original Problem')
+    line = - (w[0] / w[1]) * np.arange(-3, 4)
+    scatter_graph.plot(list(range(-3, 4)), line, label='Original Problem')
     scatter_graph.legend()
 
     alpha = positive_dual(x, y)
     posi_graph.set_xlabel('Epoch', fontsize=11)
     posi_graph.set_ylabel('Score', fontsize=11)
-    posi_sum = np.sum((alpha * y).reshape([N, -1]) * x, axis=0)
-    w_posi = (1 / (2 * LAMBDA)) * posi_sum
-    line = - (w_posi[0] / w_posi[1]) * np.arange(-2, 3)
-    scatter_graph.plot(list(range(-2, 3)), line, label='Dual Problem')
+
+    w_posi = calc_weight_from_alpha(x, y, alpha)
+    line = - (w_posi[0] / w_posi[1]) * np.arange(-3, 4)
+    scatter_graph.plot(list(range(-3, 4)), line, label='Dual Problem')
     scatter_graph.legend()
 
     scatter_graph.set_xlabel('x1', fontsize=11)

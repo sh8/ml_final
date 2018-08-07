@@ -1,3 +1,7 @@
+###################################################################
+# Implementation of SVG in Lagulange problems (original and dual) #
+###################################################################
+
 import random
 
 import numpy as np

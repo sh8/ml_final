@@ -94,7 +94,6 @@ def positive_dual(x_train, y_train):
         posi_loss.append(eval_posi_loss)
     posi_graph.plot(list(range(1, len(loss) + 1)), loss)
     loss_posi_graph.plot(list(range(1, len(loss) + 1)), loss, label='Score')
-    loss_posi_graph.legend()
     loss_posi_graph.plot(list(range(1, len(posi_loss) + 1)), posi_loss, label='Loss (Calculated via Dual Problem)')
     loss_posi_graph.legend()
     return alpha

@@ -2,6 +2,7 @@ import pickle
 
 import matplotlib.pyplot as plt
 
+RANGE = range(1, 101)
 LINES = [
     'NORM_PG_2.0.p',
     'NORM_PG_4.0.p',
@@ -13,12 +14,11 @@ LINES = [
 
 if __name__ == '__main__':
     lines = []
-    r = range(1, 101)
 
     for LINE in LINES:
         with open(LINE, 'rb') as f:
             norm = pickle.load(f)
-            line, = plt.plot(list(r), norm)
+            line, = plt.plot(list(RANGE), norm)
             lines.append(line)
 
     plt.legend(
@@ -35,4 +35,4 @@ if __name__ == '__main__':
     plt.xlabel('Iteration', fontsize=18)
     plt.ylabel('Norm', fontsize=18)
     plt.subplots_adjust(hspace=0.4)
-    plt.savefig('problem2_1_2_compare.png')
+    plt.show()

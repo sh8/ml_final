@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-LAMBDA = 2.
-N = 200
+LAMBDA = 5.
+N = 500
 fig = plt.figure(figsize=(20, 16))
 loss_graph = fig.add_subplot(2, 2, 1)
 posi_graph = fig.add_subplot(2, 2, 2)
@@ -12,7 +12,7 @@ scatter_graph = fig.add_subplot(2, 2, 3)
 
 def dataset():
     omega = np.random.randn(1, 1)
-    noise = 0.8 * np.random.randn(N, 1)
+    noise = 0.3 * np.random.randn(N, 1)
     x = np.random.randn(N, 2)
     y = 2 * (omega * x[:, 0] + x[:, 1] + noise[:, 0] > 0) - 1
     return x, y
@@ -99,7 +99,7 @@ if __name__ == '__main__':
     alpha = positive_dual(x, y)
     posi_graph.set_xlabel('Epoch', fontsize=11)
     posi_graph.set_ylabel('Score', fontsize=11)
-    w_posi = (1 / (2 * LAMBDA)) * np.sum((alpha * y[0]).reshape([200, -1]) * x, axis=0)
+    w_posi = (1 / (2 * LAMBDA)) * np.sum((alpha * y[0]).reshape([N, -1]) * x, axis=0)
     line = - (w_posi[1] / w_posi[0]) * np.arange(-2, 3)
     scatter_graph.plot(list(range(-2, 3)), line, label='Dual Problem')
     scatter_graph.legend()

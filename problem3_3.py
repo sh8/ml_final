@@ -1,27 +1,30 @@
+import random
+
 import numpy as np
 import matplotlib.pyplot as plt
 
-LAMBDA = 5.
-N = 500
+LAMBDA = 2.
+N = 200
 fig = plt.figure(figsize=(20, 16))
 loss_graph = fig.add_subplot(2, 2, 1)
 posi_graph = fig.add_subplot(2, 2, 2)
 loss_posi_graph = fig.add_subplot(2, 2, 4)
 scatter_graph = fig.add_subplot(2, 2, 3)
+RANGE = range(1, 101)
 
 
-def dataset():
-    omega = np.random.randn(1, 1)
-    noise = 0.3 * np.random.randn(N, 1)
+def gen_dataset():
+    omega = random.random()
+    noise = 0.8 * np.random.randn(N, 1)
     x = np.random.randn(N, 2)
     y = 2 * (omega * x[:, 0] + x[:, 1] + noise[:, 0] > 0) - 1
-    return x, y
+    return x, y, omega
 
 
 def eval_negative(x_train, y_train, w):
     s = 0.
     for t, x in enumerate(x_train):
-        alpha = y_train[0][t] * np.dot(w, x)
+        alpha = y_train[t] * np.dot(w, x)
         if alpha <= 1:
             s += 1 - alpha
     s += LAMBDA * np.linalg.norm(w)
@@ -31,16 +34,15 @@ def eval_negative(x_train, y_train, w):
 def negative_dual(x_train, y_train):
     w = np.random.rand(2)
     loss = []
-    r = range(1, 201)
-    for epoch in r:
+    for epoch in RANGE:
         lr = 1 / (LAMBDA * epoch)
         diff = 0.
         for t, x in enumerate(x_train):
-            alpha = y_train[0][t] * np.dot(w, x)
+            alpha = y_train[t] * np.dot(w, x)
             if alpha < 1:
-                diff -= y_train[0][t] * x
+                diff -= y_train[t] * x
             elif alpha == 1:
-                diff -= lr * y_train[0][t] * x
+                diff -= lr * y_train[t] * x
         diff += 2 * LAMBDA * w
         w = w - lr * diff
 
@@ -65,12 +67,11 @@ def positive_dual(x_train, y_train):
 
     for i in range(0, N):
         for j in range(0, N):
-            K[i, j] = y_train[0][i] * y_train[0][j] * \
+            K[i, j] = y_train[i] * y_train[j] * \
                     np.dot(x_train[i], x_train[j])
 
     loss = []
-    r = range(1, 201)
-    for epoch in r:
+    for epoch in RANGE:
         lr = 1 / (LAMBDA * (epoch + 1))
         alpha = alpha - lr * (1 / (2 * LAMBDA) * np.dot(K, alpha) - np.ones(N))
         alpha = np.clip(alpha, 0, 1)
@@ -84,23 +85,28 @@ def positive_dual(x_train, y_train):
 
 
 if __name__ == '__main__':
-    x, y = dataset()
-    scatter_graph.scatter(x[:, 0], x[:, 1], c=y[0])
+    x, y, grad = gen_dataset()
+    scatter_graph.scatter(x[:, 0], x[:, 1], c=y)
     loss_posi_graph.set_xlabel('Epoch', fontsize=11)
     loss_posi_graph.set_ylabel('Score & Loss', fontsize=11)
+
+    line = - grad * np.arange(-2, 3)
+    scatter_graph.plot(list(range(-2, 3)), line, label='Test line')
+    scatter_graph.legend()
 
     w = negative_dual(x, y)
     loss_graph.set_xlabel('Epoch', fontsize=11)
     loss_graph.set_ylabel('loss', fontsize=11)
-    line = - (w[1] / w[0]) * np.arange(-2, 3)
+    line = - (w[0] / w[1]) * np.arange(-2, 3)
     scatter_graph.plot(list(range(-2, 3)), line, label='Original Problem')
     scatter_graph.legend()
 
     alpha = positive_dual(x, y)
     posi_graph.set_xlabel('Epoch', fontsize=11)
     posi_graph.set_ylabel('Score', fontsize=11)
-    w_posi = (1 / (2 * LAMBDA)) * np.sum((alpha * y[0]).reshape([N, -1]) * x, axis=0)
-    line = - (w_posi[1] / w_posi[0]) * np.arange(-2, 3)
+    posi_sum = np.sum((alpha * y).reshape([N, -1]) * x, axis=0)
+    w_posi = (1 / (2 * LAMBDA)) * posi_sum
+    line = - (w_posi[0] / w_posi[1]) * np.arange(-2, 3)
     scatter_graph.plot(list(range(-2, 3)), line, label='Dual Problem')
     scatter_graph.legend()
 
